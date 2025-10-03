@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Строймаркет</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            position: sticky;
+            top: 57px;
+            z-index: 99;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .category {
+            margin-bottom: 24px;
+        }
+
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .products {
+            display: grid;
+            gap: 12px;
+        }
+
+        .product {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .product-color {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .product-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .btn-small {
+            padding: 4px 12px;
+            font-size: 16px;
+            min-width: 32px;
+        }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .cart-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .cart-item {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .cart-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-color {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 20px;
+        }
+
+        .cart-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .cart-total {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .cart-total-row.final {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .color-badge {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏗️ Строймаркет</h1>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-page="catalog">Каталог</div>
+        <div class="tab" data-page="cart">
+            Корзина <span id="cartBadge"></span>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Страница каталога -->
+        <div id="catalog" class="page active">
+            <div class="category">
+                <div class="category-title">Профлист</div>
+                <div class="products" id="proflist-products"></div>
+            </div>
+
+            <div class="category">
+                <div class="category-title">Металлочерепица</div>
+                <div class="products" id="tile-products"></div>
+            </div>
+        </div>
+
+        <!-- Страница корзины -->
+        <div id="cart" class="page">
+            <div id="cartContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // База данных товаров
+        const products = {
+            proflist: [
+                { id: 'p1', name: 'Профлист С8', color: 'Красный', colorHex: '#dc2626', price: 450, unit: 'м²' },
+                { id: 'p2', name: 'Профлист С8', color: 'Зеленый', colorHex: '#16a34a', price: 450, unit: 'м²' },
+                { id: 'p3', name: 'Профлист С8', color: 'Коричневый', colorHex: '#92400e', price: 450, unit: 'м²' },
+                { id: 'p4', name: 'Профлист С21', color: 'Синий', colorHex: '#2563eb', price: 520, unit: 'м²' },
+                { id: 'p5', name: 'Профлист С21', color: 'Серый', colorHex: '#6b7280', price: 520, unit: 'м²' }
+            ],
+            tile: [
+                { id: 't1', name: 'Металлочерепица Монтеррей', color: 'Красный', colorHex: '#dc2626', price: 680, unit: 'м²' },
+                { id: 't2', name: 'Металлочерепица Монтеррей', color: 'Коричневый', colorHex: '#92400e', price: 680, unit: 'м²' },
+                { id: 't3', name: 'Металлочерепица Монтеррей', color: 'Зеленый', colorHex: '#16a34a', price: 680, unit: 'м²' },
+                { id: 't4', name: 'Металлочерепица Каскад', color: 'Синий', colorHex: '#2563eb', price: 750, unit: 'м²' },
+                { id: 't5', name: 'Металлочерепица Каскад', color: 'Графит', colorHex: '#374151', price: 750, unit: 'м²' }
+            ]
+        };
+
+        // Корзина (хранится в памяти)
+        let cart = {};
+
+        // Отрисовка каталога
+        function renderCatalog() {
+            const proflistContainer = document.getElementById('proflist-products');
+            const tileContainer = document.getElementById('tile-products');
+
+            proflistContainer.innerHTML = products.proflist.map(p => createProductCard(p)).join('');
+            tileContainer.innerHTML = products.tile.map(p => createProductCard(p)).join('');
+        }
+
+        function createProductCard(product) {
+            const inCart = cart[product.id] || 0;
+            
+            return `
+                <div class="product">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-color">
+                            <span class="color-badge" style="background: ${product.colorHex}"></span>
+                            ${product.color}
+                        </div>
+                        <div class="product-price">${product.price} ₽/${product.unit}</div>
+                    </div>
+                    <div class="product-actions">
+                        ${inCart > 0 ? `
+                            <div class="quantity">
+                                <button class="btn btn-primary btn-small" onclick="changeQuantity('${product.id}', -1)">−</button>
+                                <span class="quantity-value">${inCart}</span>
+                                <button class="btn btn-primary btn-small" onclick="changeQuantity('${product.id}', 1)">+</button>
+                            </div>
+                        ` : `
+                            <button class="btn btn-primary" onclick="addToCart('${product.id}')">В корзину</button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Добавление в корзину
+        window.addToCart = function(productId) {
+            cart[productId] = 1;
+            tg.HapticFeedback.impactOccurred('light');
+            renderCatalog();
+            updateCartBadge();
+        };
+
+        // Изменение количества
+        window.changeQuantity = function(productId, delta) {
+            cart[productId] = (cart[productId] || 0) + delta;
+            if (cart[productId] <= 0) {
+                delete cart[productId];
+            }
+            tg.HapticFeedback.impactOccurred('light');
+            renderCatalog();
+            renderCart();
+            updateCartBadge();
+        };
+
+        // Удаление из корзины
+        window.removeFromCart = function(productId) {
+            delete cart[productId];
+            tg.HapticFeedback.notificationOccurred('success');
+            renderCart();
+            renderCatalog();
+            updateCartBadge();
+        };
+
+        // Отрисовка корзины
+        function renderCart() {
+            const cartContent = document.getElementById('cartContent');
+            const cartItems = Object.keys(cart);
+
+            if (cartItems.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="cart-empty">
+                        <div class="cart-empty-icon">🛒</div>
+                        <div>Корзина пуста</div>
+                    </div>
+                `;
+                tg.MainButton.hide();
+                return;
+            }
+
+            let totalPrice = 0;
+            let totalItems = 0;
+
+            const cartHTML = cartItems.map(id => {
+                const product = findProduct(id);
+                const quantity = cart[id];
+                const itemTotal = product.price * quantity;
+                totalPrice += itemTotal;
+                totalItems += quantity;
+
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-header">
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">${product.name}</div>
+                                <div class="cart-item-color">
+                                    <span class="color-badge" style="background: ${product.colorHex}"></span>
+                                    ${product.color}
+                                </div>
+                            </div>
+                            <button class="cart-item-remove" onclick="removeFromCart('${id}')">×</button>
+                        </div>
+                        <div class="cart-item-footer">
+                            <div class="quantity">
+                                <button class="btn btn-primary btn-small" onclick="changeQuantity('${id}', -1)">−</button>
+                                <span class="quantity-value">${quantity}</span>
+                                <button class="btn btn-primary btn-small" onclick="changeQuantity('${id}', 1)">+</button>
+                            </div>
+                            <div class="cart-item-price">${itemTotal} ₽</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            cartContent.innerHTML = `
+                ${cartHTML}
+                <div class="cart-total">
+                    <div class="cart-total-row">
+                        <span>Товаров:</span>
+                        <span>${totalItems} шт</span>
+                    </div>
+                    <div class="cart-total-row final">
+                        <span>Итого:</span>
+                        <span>${totalPrice} ₽</span>
+                    </div>
+                </div>
+            `;
+
+            // Показываем главную кнопку для оформления заказа
+            tg.MainButton.setText(`Оформить заказ • ${totalPrice} ₽`);
+            tg.MainButton.show();
+        }
+
+        // Найти товар по ID
+        function findProduct(id) {
+            return [...products.proflist, ...products.tile].find(p => p.id === id);
+        }
+
+        // Обновление бейджа корзины
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const count = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+            badge.textContent = count > 0 ? `(${count})` : '';
+        }
+
+        // Переключение вкладок
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const page = tab.dataset.page;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(page).classList.add('active');
+
+                if (page === 'cart') {
+                    renderCart();
+                } else {
+                    tg.MainButton.hide();
+                }
+            });
+        });
+
+        // Оформление заказа
+        tg.MainButton.onClick(() => {
+            const user = tg.initDataUnsafe.user;
+            const orderData = {
+                user_id: user?.id,
+                user_name: user?.first_name,
+                items: Object.keys(cart).map(id => {
+                    const product = findProduct(id);
+                    return {
+                        name: product.name,
+                        color: product.color,
+                        quantity: cart[id],
+                        price: product.price,
+                        total: product.price * cart[id]
+                    };
+                }),
+                total: Object.keys(cart).reduce((sum, id) => {
+                    const product = findProduct(id);
+                    return sum + (product.price * cart[id]);
+                }, 0)
+            };
+
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify(orderData));
+            tg.HapticFeedback.notificationOccurred('success');
+        });
+
+        // Инициализация
+        renderCatalog();
+        updateCartBadge();
+
+        // Настройка темы
+        tg.ready();
+    </script>
+</body>
+</html>
